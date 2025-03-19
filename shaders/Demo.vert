@@ -14,5 +14,5 @@ void main() {
                        ((vert_pos.y / 800) * 2.0) - 1.0,
                        (vert_pos.z * 2.0) - 1.0,
                        1.0);
-    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+
 }
