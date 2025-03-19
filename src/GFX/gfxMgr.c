@@ -3,8 +3,39 @@
 #include "../../include/GFX/gfxMgr.h"
 
 static void FramebufferSizeCallback(GLFWwindow *window, int32_t w, int32_t h);
+static void GLAPIENTRY DebugCallback(GLenum source, GLenum type, GLuint id,
+                                     GLenum severity, GLsizei length,
+                                     const GLchar *message, const void *userParam);
+static void EnableOpenGLDebug();
+
+static void GLAPIENTRY DebugCallback(GLenum source, GLenum type, GLuint id,
+                                    GLenum severity, GLsizei length,
+                                    const GLchar *message, const void *userParam) {
+    (void)length;
+    (void)userParam;
+    (void)id;
+
+    fprintf(stderr, "OpenGL Debug Message:\n");
+    fprintf(stderr, "  Source: 0x%x\n", source);
+    fprintf(stderr, "  Type: 0x%x\n", type);
+    fprintf(stderr, "  Severity: 0x%x\n", severity);
+    fprintf(stderr, "  Message: %s\n", message);
+}
+
+static void EnableOpenGLDebug() {
+    if (glDebugMessageCallback) {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(DebugCallback, NULL);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0,
+                              NULL, GL_TRUE);
+    } else {
+        fprintf(stderr, "glDebugMessageCallback not available\n");
+    }
+}
 
 static void FramebufferSizeCallback(GLFWwindow *window, int32_t w, int32_t h) {
+    (void)window;
     glViewport(0, 0, w, h);
 }
 
@@ -36,6 +67,8 @@ int32_t gfx_Init(GLFWwindow **pWindow, GLuint *pProgram,
         !obj_Build(pGfx_object, "Demo.obj", obj_DemoShaderAttrLinker)) {
         return 0;
     }
+
+    EnableOpenGLDebug();
 
     return 1;
 }
