@@ -7,6 +7,12 @@ static void GLAPIENTRY DebugCallback(GLenum source, GLenum type, GLuint id,
                                      GLenum severity, GLsizei length,
                                      const GLchar *message, const void *userParam);
 static void EnableOpenGLDebug();
+static void SetCallbacks(GLFWwindow *window);
+
+static void FramebufferSizeCallback(GLFWwindow *window, int32_t w, int32_t h) {
+    (void)window;
+    glViewport(0, 0, w, h);
+}
 
 static void GLAPIENTRY DebugCallback(GLenum source, GLenum type, GLuint id,
                                     GLenum severity, GLsizei length,
@@ -23,20 +29,21 @@ static void GLAPIENTRY DebugCallback(GLenum source, GLenum type, GLuint id,
 }
 
 static void EnableOpenGLDebug() {
-    if (glDebugMessageCallback) {
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(DebugCallback, NULL);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0,
-                              NULL, GL_TRUE);
-    } else {
-        fprintf(stderr, "glDebugMessageCallback not available\n");
-    }
+    /**
+     * Disable for prod build.
+     * And you, Yes I am talking to you. Don't you dare forget this.
+     * I will be so disappointed.
+     **/
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(DebugCallback, NULL);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0,
+                          NULL, GL_TRUE);
 }
 
-static void FramebufferSizeCallback(GLFWwindow *window, int32_t w, int32_t h) {
-    (void)window;
-    glViewport(0, 0, w, h);
+static void SetCallbacks(GLFWwindow *window) {
+    glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+    EnableOpenGLDebug();
 }
 
 int32_t gfx_Init(GLFWwindow **pWindow, GLuint *pProgram,
@@ -63,12 +70,12 @@ int32_t gfx_Init(GLFWwindow **pWindow, GLuint *pProgram,
         fprintf(stderr, "GLAD initialization failed.\n");
         return 0;
     }
+    SetCallbacks(*pWindow);
+
     if (!shdr_Build(pProgram, "shaders/Demo.vert", "shaders/Demo.frag") ||
-        !obj_Build(pGfx_object, "Demo.obj", obj_DemoShaderAttrLinker)) {
+        !obj_Build(pGfx_object, "models/Player.obj", obj_DemoShaderAttrLinker)) {
         return 0;
     }
-
-    EnableOpenGLDebug();
 
     return 1;
 }

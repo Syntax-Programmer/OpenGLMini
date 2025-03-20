@@ -120,10 +120,6 @@ static int32_t ParseDataFile(Struct_GFXObjects *pGfx_object,
         }
     }
 
-    for (int i = 0; i < PER_LINE_VERT_ATTR_COUNT * 4; i++) {
-        printf("%d\n", *((int*)g_GetArrayElem(&pGfx_object->vertices, i)));
-    }
-
     fclose(data_file);
 
     return 1;
